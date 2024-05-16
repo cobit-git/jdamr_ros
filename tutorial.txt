@@ -1,0 +1,5 @@
+1. jdamr_ros_bringup_1
+- Receving encoder data from Arduino 
+- Encoder data is fake simulated value. But youcan use real encoder hardware.
+- Basic ROS node. There are no sub aor pub.
+- Encoder data are printed on python console.

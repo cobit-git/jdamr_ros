@@ -1,0 +1,3 @@
+<launch>
+    <node pkg="jdamr_ros_bringup_1" type="jdamr_bringup_1.py" name="jdamr_driver_node_1" required="true" output="screen" />
+</launch>
