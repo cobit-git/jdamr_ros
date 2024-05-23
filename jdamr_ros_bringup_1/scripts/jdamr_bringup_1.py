@@ -20,7 +20,7 @@ In this script, we study follwings:
 Class for vehicle control 
 '''
 class JDamr(object):
-    def __init__(self, com="/dev/ttyUSB0"):
+    def __init__(self, com="/dev/ttyUSB1"):
         self.ser = serial.Serial(com, 115200)
         self.HEAD = 0xf5
        

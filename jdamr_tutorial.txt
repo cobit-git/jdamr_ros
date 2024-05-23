@@ -1,0 +1,22 @@
+1. jdamr_ros_bringup_1
+- Receving encoder data from Arduino 
+- Encoder data is fake simulated value. But you can use real encoder hardware.
+- Basic ROS node. There are no sub or pub.
+- Encoder data are printed on python console.
+
+2. jdamr_ros_bringup_2
++ jdamr_ros_bringup_1
+- Add teleop launch 
+- Accordingly adding teleop subscriber to jdamr_ros_bringup_2 node 
+- Through teleop key input, you can toggle Arduino 13 pin LED. 
+- Adding joint state publisher to jdamr_ros_bringup_2 node 
+
+3. jdamr_ros_bringup_3
++ jdamr_ros_bringup_2
+- Adding rviz to monitor joint state vhange visually in rviz 
+
+4. jdamr_ros_bringup_4
++ jdamr_ros_bringup_3 
+- Adding teleop key input contol
+- You can control wheel move uisng teleop on rviz.
+- Dgital twin: Also you can control real wheel attached to arduino as digital twin. 

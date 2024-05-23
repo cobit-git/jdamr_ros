@@ -10,11 +10,15 @@
 // Using softserial as debugging. Arduino Uno has only 1 serial port. 
 SoftwareSerial Serial2(7,8);
 
+// Step 4 for motor control, in this code, using L9110 motor driver IC 
+// Using pin 5, 6 pwm enabled pins 
 void setup() {
   Serial.begin(115200);
   Serial2.begin(115200);
   Serial2.println("hello...");
   pinMode(13, OUTPUT);
+  pinMode(5, OUTPUT);
+  pinMode(6, OUTPUT);
 }
 
 void byte_to_hex(byte a){
@@ -23,6 +27,20 @@ void byte_to_hex(byte a){
   // Serial2.println(hexString);  // for debugging 
 }
 
+void go_forward(int speed){
+  analogWrite(6, speed);
+  digitalWrite(5, LOW);
+}
+
+void go_backward(int speed){
+  analogWrite(5, speed);
+  digitalWrite(6, LOW);
+}
+
+void stop(){
+  digitalWrite(5, LOW);
+  digitalWrite(6, LOW);
+}
 /* 
 Encoder variable
 We should use long data type. Arduino long data type is 4 bytes.
@@ -46,12 +64,13 @@ void loop(){
       byte_to_hex(c);
       if(c == CMD_SET_MOTOR){
         byte lf = Serial.read();    //speed 1 
-        // If you set left-front motor speed 100, 13 LED turned on. 
-        // You can toggle 13 LED using ROS teleop. 
-        if(lf == 100){
-          digitalWrite(13, HIGH);
+        // We use left-front wheel. ROS send speed data. It controls left-front wheel.
+        if(lf > 0){
+          go_forward(lf);
+        }else if(lf < 0){
+          go_backward(lf*-1);
         }else{
-          digitalWrite(13, LOW);
+          stop();
         }
         byte_to_hex(lf);
         byte rf = Serial.read();    //speed 2

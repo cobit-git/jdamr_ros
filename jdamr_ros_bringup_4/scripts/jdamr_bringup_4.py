@@ -1,10 +1,21 @@
 #!/usr/bin/env python3
-# coding: utf-8
+#from JDamr_lib import JDamr
+from geometry_msgs.msg import Twist
+from sensor_msgs.msg import JointState, LaserScan
+import rospy
+import random
 import serial
 import threading 
 import struct
 import time 
 
+
+'''
+In this script, we study follwings:
+1. How to write basic ROS node for robot car
+2. This node subscribes teleop node using "cmd_vel" topic.
+3. This node control robot through serial according to teleop input. 
+'''
 
 class JDamr(object):
     def __init__(self, com="/dev/ttyACM0"):
@@ -116,24 +127,81 @@ class JDamr(object):
             print('---set_car_run error!---')
             pass
 
+class jdamr_driver: 
+    def __init__(self):
+        rospy.on_shutdown(self.reset_amr)
+        self.jdamr = JDamr()
+        # This variable hold prefixs for joint state 
+        self.Prefix = rospy.get_param("~prefix", "")
+        self.cmd_vel_sub = rospy.Subscriber('cmd_vel', Twist, self.cmd_vel_callback, queue_size=100 )
+        # This code generate "joint state" token publisher 
+        self.states_pub = rospy.Publisher('joint_states', JointState, queue_size=100)
+        time.sleep(1)
+        self.jdamr.receive_thread()
+        # wheel joint state 
+        self.wheel_state = JointState()
+        self.motor_speed = 0 # 0 : motor stop
 
-if __name__ == '__main__':
-    com = '/dev/ttyACM0'
-    bot = JDamr(com)
-    time.sleep(1)
-    bot.receive_thread()
-   
-    while True:
-        # CMD_SET_MOTOR test 
-        bot.set_motor(100, 100, 100, 100)
-        time.sleep(1)
-        bot.set_motor(50,50,50,50)
-        time.sleep(1)
-        # CMD_CAR_RUN test 
-        #bot.set_car_run(1, 100) 
-        #time.sleep(5)
-        #bot.set_car_run(1, 50) 
-        #time.sleep(5)
+    def reset_amr(self):
+        pass
+        #self.cmd_vel_sub.unregister()
+        #self.states_pub.unregister()
+
+    '''
+    This function publish joint state of wheels. Using joint state, we can control wheels on rviz 
     
+    '''    
+    i = -3.14
+    def pub_data(self):
+        '''
+        In this step, we add only joinst state. 
+        '''
+
+        i = -3.14
+        while not rospy.is_shutdown():
+            # preparing joint state 
+            self.wheel_state.header.stamp = rospy.Time.now()
+            self.wheel_state.header.frame_id = 'joint_states'
+            if len(self.Prefix)==0:
+                self.wheel_state.name = ["wheel1_joint", "wheel2_joint",
+                              "wheel3_joint", "wheel4_joint"]
+            else:
+                self.wheel_state.name = [self.Prefix+"/wheel1_joint", self.Prefix+"/wheel2_joint",
+                              self.Prefix+"/wheel3_joint", self.Prefix+"/wheel4_joint"]
+           
 
 
+            i += 0.001*self.motor_speed # Control of wheel speed on rviz
+            if i > 3.14:
+                i = -3.14
+            elif i < -3.14:
+                i = 3.14
+            self.wheel_state.position = [i, 0, 0, 0]
+            self.states_pub.publish(self.wheel_state)
+
+
+    def cmd_vel_callback(self, msg):
+        if not isinstance(msg, Twist):
+            return 
+        x = msg.linear.x
+        y = msg.linear.y
+        angle = msg.angular.z
+        rospy.loginfo("cmd_velx: {}, cmd_vely: {}, cmd_ang: {}".format(x, y, angle))
+        # use 'u' and 'i' key to control motor. 'angle' value is changed.
+        self.motor_speed = angle * 100
+        # limiting max motor value 
+        if self.motor_speed > 100:
+            self.motor_speed = 100
+        elif self.motor_speed < -100:
+            self.motor_speed = -100
+        print('uga: ', self.motor_speed)
+        # according to teleop key input, it control real motor 
+        self.jdamr.set_motor(int(self.motor_speed), 0, 0, 0)   
+        
+if __name__ == '__main__':
+    rospy.init_node("jdamr_driver_node", anonymous=False)
+    rate = rospy.Rate(10) # 10hz
+    driver = jdamr_driver()
+    driver.pub_data()
+    rospy.spin()
+    

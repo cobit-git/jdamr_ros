@@ -1,0 +1,9 @@
+<launch>
+    <arg name="model" />
+    <param name="robot_description" textfile="$(find jdamr_ros_bringup_3)/urdf/jdamr.urdf" />
+    <arg name="rvizconfig" default="$(find jdamr_ros_bringup_3)/rviz/mycobot_320.rviz" />
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
+    <!-- <node name="rviz" pkg="rviz" type="rviz"  required="true" /> -->
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+    <node pkg="jdamr_ros_bringup_3" type="jdamr_bringup_3.py" name="jdamr_driver_node_3" required="true" output="screen" />
+</launch>

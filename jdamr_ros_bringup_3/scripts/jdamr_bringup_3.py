@@ -18,7 +18,7 @@ In this script, we study follwings:
 '''
 
 class JDamr(object):
-    def __init__(self, com="/dev/ttyUSB0"):
+    def __init__(self, com="/dev/ttyACM0"):
         self.ser = serial.Serial(com, 115200)
         self.HEAD = 0xf5
         self.CMD_SET_MOTOR = 0x01
@@ -134,15 +134,15 @@ class jdamr_driver:
         # This variable hold prefixs for joint state 
         self.Prefix = rospy.get_param("~prefix", "")
         self.cmd_vel_sub = rospy.Subscriber('cmd_vel', Twist, self.cmd_vel_callback, queue_size=100 )
-        self.scan_sub = rospy.Subscriber('scan', LaserScan, self.laser_scan_callback, queue_size=100 )
+        # This code generate "joint state" token publisher 
         self.states_pub = rospy.Publisher('joint_states', JointState, queue_size=100)
         time.sleep(1)
         self.jdamr.receive_thread()
-        self.laser_scan = LaserScan()
 
     def reset_amr(self):
-        self.cmd_vel_sub.unregister()
-        self.states_pub.unregister()
+        pass
+        #self.cmd_vel_sub.unregister()
+        #self.states_pub.unregister()
     i = -3.14
     def pub_data(self):
         '''
@@ -180,25 +180,15 @@ class jdamr_driver:
         y = msg.linear.y
         angle = msg.angular.z
         rospy.loginfo("cmd_velx: {}, cmd_vely: {}, cmd_ang: {}".format(x, y, angle))
+        '''
+        If you press 'U' key at ROS teleop, so angle value is above 0.5, speed of 4 motors are set to 100.
+        It will let Arduino LED 13 turned on. 
+        '''
         if angle >= 0.5:
-            self.jdamr.set_motor(120, 120, 120, 120)
+            self.jdamr.set_motor(100, 100, 100, 100)
         else:
             self.jdamr.set_motor(-127, -127, -127, -127)
 
-    def laser_scan_callback(self, msg):
-        current_time = rospy.Time.now()
-        self.laser_scan.header.stamp = current_time
-        self.laser_scan.header.frame_id = 'laser'
-        self.laser_scan.angle_min = -3.1415
-        self.laser_scan.angle_max = 3.1415
-        self.laser_scan.angle_increment = 0.00311202858575
-        self.laser_scan.time_increment = 4.99999987369e-05
-        self.laser_scan.range_min = 0.00999999977648
-        self.laser_scan.range_max = 32.0
-        self.laser_scan.ranges = msg.ranges[0:72]
-        self.laser_scan.intensities = msg.intensities[0:72]
-        print(self.laser_scan)
-            
 if __name__ == '__main__':
     rospy.init_node("jdamr_driver_node", anonymous=False)
     rate = rospy.Rate(10) # 10hz
