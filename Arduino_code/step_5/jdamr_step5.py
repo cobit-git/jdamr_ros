@@ -10,8 +10,8 @@ class JDamr(object):
         self.CMD_SET_MOTOR = 0x01
         self.CMD_GET_SPEED = 0x02
         self.CMD_GET_ENCODER = 0x03
-
         self.CMD_CAR_RUN = 0x04
+        self.CMD_GET_IMU = 0x05
 
         if self.ser.isOpen():
             print("JDamr serial port opened!")
@@ -52,12 +52,13 @@ class JDamr(object):
             pass
 
     def parse_cmd(self, payload):
-        if self.CMD_GET_ENCODER == payload[0]:
-            encode1_str = payload[1:5]
-            print(encode1_str)
-            encode1 =int.from_bytes(encode1_str, byteorder="big")
-            print(encode1)
+        if self.CMD_GET_IMU == payload[0]:
+            pitch_str = payload[1:5]
+            print(pitch_str)
+            pitch = int.from_bytes(pitch_str, byteorder="big", signed=True)
+            print(pitch)
 
+   
 if __name__ == '__main__':
     com = '/dev/ttyACM0'
     bot = JDamr(com)
@@ -65,7 +66,4 @@ if __name__ == '__main__':
     bot.receive_thread()
    
     while True:
-       pass
-
-
-
+        pass

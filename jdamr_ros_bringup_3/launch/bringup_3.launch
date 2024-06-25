@@ -5,5 +5,6 @@
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
     <!-- <node name="rviz" pkg="rviz" type="rviz"  required="true" /> -->
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
-    <node pkg="jdamr_ros_bringup_3" type="jdamr_bringup_3.py" name="jdamr_driver_node_3" required="true" output="screen" />
+    <!--<node pkg="jdamr_ros_bringup_3" type="jdamr_bringup_3.py" name="jdamr_driver_node_3" required="true" output="screen" />-->
+    <node name="joint_state_publisher_gui" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui"/>
 </launch>
